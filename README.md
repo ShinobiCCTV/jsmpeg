@@ -15,16 +15,30 @@ Some more info and demos: [jsmpeg.com](http://jsmpeg.com/)
 
 ## Usage
 
-A JSMpeg video player can either be created in HTML using the CSS class `jsmpeg` for the container:
+Basic usage of jsmpeg-pipe with a socket.io client
 
-```html
-<div class="jsmpeg" data-url="<url>"></div>
 ```
-
-or by directly calling the `JSMpeg.Player()` constructor in JavaScript:
-
-```javascript
-var player = new JSMpeg.Player(url [, options]);
+<script src="/libs/js/socket.io.js"></script>
+<script src="/libs/js/jquery.min.js"></script>
+<script src="/libs/js/jsmpeg.pipe.js"></script>
+<canvas id="canvas" height=500 width=500></canvas>
+<script>
+    var socket = io();
+    console.log(socket)
+    socket.on('connect',function(){
+        //pretend this is the command you use to initiate getting H.264 (MPEG) data
+        socket.emit('f',{function:'getStream',feed:'2'})
+    })
+    // initiate a player that can be piped to.
+    var player = new JSMpeg.Player('pipe',{
+        canvas:document.getElementById('canvas')
+    });
+    socket.on('h264', function (data) {
+        // pretend you are getting data as follows
+        // data = {buffer:ArrayBuffer}
+        player.write(data.buffer)
+    });
+</script>
 ```
 
 Note that using the HTML Element (internally `JSMpeg.VideoElement`) provides some features on top of `JSMpeg.Player`. Namely a SVG pause/play button and the ability to "unlock" audio on iOS devices.
