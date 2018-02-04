@@ -372,7 +372,7 @@ JSMpeg.BitBuffer = function() {
         this.index -= bytePos << 3;
         return
     };
-    BitBuffer.prototype.write = function(buffers) {
+    BitBuffer.prototype.write = function(buffers,callback) {
         var isArrayOfBuffers = typeof buffers[0] === "object",
             totalLength = 0,
             available = this.bytes.length - this.byteLength;
@@ -399,6 +399,7 @@ JSMpeg.BitBuffer = function() {
         } else {
             this.appendSingleBuffer(buffers)
         }
+        if(callback)callback()
     };
     BitBuffer.prototype.appendSingleBuffer = function(buffer) {
         buffer = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -502,13 +503,14 @@ JSMpeg.Demuxer.TS = function() {
             buffers: []
         }
     };
-    TS.prototype.write = function(buffer) {
+    TS.prototype.write = function(buffer,callback) {
         if (this.leftoverBytes) {
             var totalLength = buffer.byteLength + this.leftoverBytes.byteLength;
             this.bits = new JSMpeg.BitBuffer(totalLength);
-            this.bits.write([this.leftoverBytes, buffer])
+            this.bits.write([this.leftoverBytes, buffer],callback)
         } else {
             this.bits = new JSMpeg.BitBuffer(buffer)
+            callback()
         }
         this.parsePacket=TS.prototype.parsePacket
         this.packetStart=TS.prototype.packetStart
